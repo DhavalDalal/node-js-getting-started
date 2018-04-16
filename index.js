@@ -18,14 +18,14 @@ function randomNumberBetween(min, max, decimalPlaces) {
     return decimalValue.toFixed(decimalPlaces);
 }
 
-function sendJson(response, object) {
+function sendJson(response, statusCode, object) {
   response.setHeader('Content-Type', 'application/json');
+  response.status(statusCode);  
   response.send(JSON.stringify(object));
 }
 
-function sendErrorJson(res, statusCode, errObject) {
-	res.status(404);  
-	sendJson(res, { error: errObject });
+function sendErrorJson(response, statusCode, errMessage) {
+	sendJson(response, statusCode, { error: errMessage });
 }
 
 express()
@@ -39,7 +39,7 @@ express()
 		  stock.price = randomNumberBetween(stock.low, stock.high, 2);
 		  return stock;
 	  });
-	  sendJson(res, stocksWithPrices);
+	  sendJson(res, 200, stocksWithPrices);
   })
   .get('/stocks/:ticker', (req, res) => {
 	  let ticker = req.params.ticker;
@@ -47,13 +47,14 @@ express()
 	  let found = STOCKS.filter(stock => stock.ticker === ticker)[0];
 	  if (found) {
 		  found.price = randomNumberBetween(found.low, found.high, 2);
-		  sendJson(res, found);
-	  } else 
+		  sendJson(res, 200, found);
+	  } else
 		  sendErrorJson(res, 404, 'Ticker ' + ticker + ' Not found!');
   })
-  .get('/simulateException', (err, req, res, next) => {
-  	  console.info("Simulating Server Fail by Exception...");
+  .get('/simulateException', (req, res, next) => {
+	  const error = new Error('Oops! Something went wrong');
+  	  console.error("Simulating Server Fail by Exception...", error);
 	  // throw new Error('Oops! Something went wrong');
-	  sendErrorJson(res, 500, new Error('Oops! Something went wrong'));
+	  sendErrorJson(res, 503, error.message);
   })
   .listen(PORT, () => console.log(`Listening on ${ PORT }`))
