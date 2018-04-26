@@ -1,5 +1,5 @@
 const { spawn } = require('child_process');
-const request = require('request');
+const request = require('request-promise');
 var test = require('tape');
 var child = null;
 
@@ -64,6 +64,23 @@ test("Gets All Stocks", function (assert) {
   // afterEach logic will run
 });
 
+test("Gets A Stock by ticker", function (assert) {
+  const options = {
+    uri: 'http://127.0.0.1:5000/stocks/AAPL',
+	json: true // Automatically parses the JSON string in the response	
+  };
+  request(options)
+    .then(stock => {
+	  assert.equal(stock.ticker, 'AAPL');
+	  assert.equal(stock.name, 'Apple Inc.');
+	  assert.true(stock.price >= stock.low);
+	  assert.true(stock.price <= stock.high);
+      assert.end();
+    })
+	.catch(error => {
+      assert.fail('Should have got stock by Ticker code');
+    });
+});
 
 after("Stopping The Application!", function (assert) {
     // after logic
@@ -71,7 +88,6 @@ after("Stopping The Application!", function (assert) {
     // when done call
     assert.end();
 });
-
 
 function beforeEach(test, handler) {
     return function tapish(name, listener) {
@@ -86,6 +102,7 @@ function beforeEach(test, handler) {
         })
     }
 }
+
 function afterEach(test, handler) {
     return function tapish(name, listener) {
         test(name, function (assert) {
