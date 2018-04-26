@@ -33,6 +33,11 @@ express()
   .set('views', path.join(__dirname, 'views'))
   .set('view engine', 'ejs')
   .get('/', (req, res) => res.render('pages/index'))
+	//   .post('/stocks', (req, res) => {
+	//   	console.info("Posting a new ticker", req.route.stack);
+	// var stock = {ticker: req.params.ticker, name: req.params.name};
+	// sendJson(res, 200, stock);
+	//   })
   .get('/stocks', (req, res) => {
 	  console.info("Getting all ticker prices...");
 	  let stocksWithPrices = STOCKS.map(stock => {
