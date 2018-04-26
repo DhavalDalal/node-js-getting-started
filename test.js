@@ -67,6 +67,7 @@ test("Gets All Stocks", function (assert) {
 test("Gets A Stock by ticker", function (assert) {
   const options = {
     uri: 'http://127.0.0.1:5000/stocks/AAPL',
+	method: 'GET',
 	json: true // Automatically parses the JSON string in the response	
   };
   request(options)
@@ -79,6 +80,25 @@ test("Gets A Stock by ticker", function (assert) {
     })
 	.catch(error => {
       assert.fail('Should have got stock by Ticker code');
+    });
+});
+
+
+test("Shouts when trying to obtain A Stock by unknown ticker", function (assert) {
+  const options = {
+    uri: 'http://127.0.0.1:5000/stocks/UNKNOWN',
+	method: 'GET',
+	json: true // Automatically parses the JSON string in the response	
+  };
+  request(options)
+    .then(stock => {
+  	  assert.fail('Should NOT have got stock by UNKNOWN Ticker code');
+    })
+	.catch(error => {
+	  const response = error.response;
+	  assert.equal(response.statusCode, 404);
+	  assert.deepEqual(response.body, { error: 'Ticker UNKNOWN Not found!' });
+      assert.end();
     });
 });
 
