@@ -1,7 +1,7 @@
 const { spawn } = require('child_process');
 const request = require('request-promise');
 var test = require('tape');
-var child = null;
+let child = null;
 
 // before/after/beforeEach/afterEach based on
 // https://github.com/substack/tape/issues/59
@@ -23,16 +23,22 @@ test = afterEach(test, function after(assert) {
     // called after each thing
     assert.pass('After Each Test');
     // when done call
-    assert.end()
+    assert.end();
 });
 
 before("Starting the Application...", function (assert) {
   // before logic
   const env = Object.assign({}, process.env, {PORT: 5000});
   child = spawn('node', ['index.js'], {env});
-  
-  // when done call
-  assert.end();
+  let calledOnce = false;
+  child.stdout.on('data', (data) => {
+    if (calledOnce === false) {
+      calledOnce = true;
+      console.info(`Server Started. ${data}`);
+      // when done call
+      assert.end();
+    }
+  });
 });
 
 test("should return home page", function (assert) {
@@ -54,10 +60,10 @@ test("Gets All Stocks", function (assert) {
   request('http://127.0.0.1:5000/stocks', (error, response, body) => {
     // Successful response
     assert.equal(response.statusCode, 200);
-	const stocks = JSON.parse(body);
-	assert.equal(stocks.length, 4);
-	const tickers = stocks.map(stock => stock.ticker);
-	assert.deepEqual(tickers, ['AAPL', 'GOOG', 'MSFT', 'ORCL']);
+  	const stocks = JSON.parse(body);
+	  assert.equal(stocks.length, 4);
+	  const tickers = stocks.map(stock => stock.ticker);
+	  assert.deepEqual(tickers, ['AAPL', 'GOOG', 'MSFT', 'ORCL']);
     // Assert content checks
     assert.end();
   });
@@ -67,37 +73,36 @@ test("Gets All Stocks", function (assert) {
 test("Gets A Stock by ticker", function (assert) {
   const options = {
     uri: 'http://127.0.0.1:5000/stocks/AAPL',
-	method: 'GET',
-	json: true // Automatically parses the JSON string in the response	
+    method: 'GET',
+    json: true // Automatically parses the JSON string in the response
   };
   request(options)
     .then(stock => {
-	  assert.equal(stock.ticker, 'AAPL');
-	  assert.equal(stock.name, 'Apple Inc.');
-	  assert.true(stock.price >= stock.low);
-	  assert.true(stock.price <= stock.high);
+      assert.equal(stock.ticker, 'AAPL');
+      assert.equal(stock.name, 'Apple Inc.');
+      assert.true(stock.price >= stock.low);
+      assert.true(stock.price <= stock.high);
       assert.end();
     })
-	.catch(error => {
+   .catch(error => {
       assert.fail('Should have got stock by Ticker code');
     });
 });
 
-
 test("Shouts when trying to obtain A Stock by unknown ticker", function (assert) {
   const options = {
     uri: 'http://127.0.0.1:5000/stocks/UNKNOWN',
-	method: 'GET',
-	json: true // Automatically parses the JSON string in the response	
+    method: 'GET',
+    json: true // Automatically parses the JSON string in the response
   };
   request(options)
     .then(stock => {
-  	  assert.fail('Should NOT have got stock by UNKNOWN Ticker code');
+      assert.fail('Should NOT have got stock by UNKNOWN Ticker code');
     })
-	.catch(error => {
-	  const response = error.response;
-	  assert.equal(response.statusCode, 404);
-	  assert.deepEqual(response.body, { error: 'Ticker UNKNOWN Not found!' });
+    .catch(error => {
+      const response = error.response;
+      assert.equal(response.statusCode, 404);
+      assert.deepEqual(response.body, { error: 'Ticker UNKNOWN Not found!' });
       assert.end();
     });
 });
@@ -105,9 +110,12 @@ test("Shouts when trying to obtain A Stock by unknown ticker", function (assert)
 after("Stopping The Application!", function (assert) {
     // after logic
     child.kill();
-    // when done call
-    assert.end();
-});
+    child.on('exit', (code, signal) => {
+      console.log(`Server Shutdown.  Exited with code ${code} and signal ${signal}`);
+      // when done call
+      assert.end();
+    });
+  });
 
 function beforeEach(test, handler) {
     return function tapish(name, listener) {
@@ -117,7 +125,6 @@ function beforeEach(test, handler) {
                 assert.end = _end
                 listener(assert)
             }
-
             handler(assert)
         })
     }
@@ -131,7 +138,6 @@ function afterEach(test, handler) {
                 assert.end = _end
                 handler(assert)
             }
-
             listener(assert)
         })
     }
