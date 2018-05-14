@@ -28,7 +28,7 @@ function sendErrorJson(response, statusCode, errMessage) {
 	sendJson(response, statusCode, { error: errMessage });
 }
 
-express()
+const server = express()
   .use(express.static(path.join(__dirname, 'public')))
   .set('views', path.join(__dirname, 'views'))
   .set('view engine', 'ejs')
@@ -62,4 +62,8 @@ express()
 	  // throw new Error('Oops! Something went wrong');
 	  sendErrorJson(res, 503, error.message);
   })
-  .listen(PORT, () => console.log(`Listening on ${ PORT }`))
+  .listen(PORT, () => console.log(`Listening on ${ PORT }`));
+
+exports.stop = function stop() {
+	server.close(() => console.log(`Shutdown server...`));
+}
