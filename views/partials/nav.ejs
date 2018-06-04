@@ -13,14 +13,22 @@
     <li class="dropdown">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><span class="glyphicon glyphicon-info-sign"></span> Getting Stock Prices<span class="caret"></span></a>
         <ul class="dropdown-menu" role="menu">
-          <li><a href="/stocks/AAPL">Get Apple Price</a></li>
-          <li><a href="/stocks/GOOG">Get Google Price</a></li>
-          <li><a href="/stocks/MSFT">Get Microsoft Price</a></li>
-          <li><a href="/stocks/ORCL">Get Oracle Price</a></li>
+          <li><a href="<%= req.path %>/stocks/AAPL">Get Apple Price</a></li>
+          <li><a href="<%= req.path %>/stocks/GOOG">Get Google Price</a></li>
+          <li><a href="<%= req.path %>/stocks/MSFT">Get Microsoft Price</a></li>
+          <li><a href="<%= req.path %>/stocks/ORCL">Get Oracle Price</a></li>
           <li class="divider"></li>
-          <li><a href="/stocks">Get All Stock Prices</a></li>
-          <li><a href="/stocks/UNKNOWN">Get Unknown Ticker Price</a></li>
-          <li><a href="/simulateException">Simulate Server Exception</a></li>
+          <li><a href="<%= req.path %>/stocks">Get All Stock Prices</a></li>
+          <li><a href="<%= req.path %>/stocks/UNKNOWN">Get Unknown Ticker Price</a></li>
+          <li><a href="<%= req.path %>/simulateException">Simulate Server Exception</a></li>
+          <li class="divider"></li>
+          <li><a href="<%= realtimeReq.path %>/stocks/realtime/AAPL">Get Apple Price in Realtime</a></li>
+          <li><a href="<%= realtimeReq.path %>/stocks/realtime/GOOG">Get Google Price in Realtime</a></li>
+          <li><a href="<%= realtimeReq.path %>/stocks/realtime/MSFT">Get Microsoft Price in Realtime</a></li>
+          <li><a href="<%= realtimeReq.path %>/stocks/realtime/ORCL">Get Oracle Price in Realtime</a></li>
+          <li class="divider"></li>
+          <li><a href="<%= realtimeReq.path %>/stocks/realtime">Get All Stock Prices in Realtime</a></li>
+          <li><a href="<%= realtimeReq.path %>/stocks/realtime/UNKNOWN">Get Unknown Ticker Price in Realtime</a></li>
         </ul>
     </li>		
 	</ul>

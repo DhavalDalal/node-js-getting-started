@@ -1,22 +1,7 @@
 const express = require('express')
-const path = require('path')
-const PORT = process.env.PORT || 5000
-
-
-const STOCKS = [
-	{ticker: 'AAPL', name: 'Apple Inc.', low: 30.35, high: 60.45},
-	{ticker: 'GOOG', name: 'Google Inc.', low: 90.67, high: 160.34},
-	{ticker: 'MSFT', name: 'Microsoft Inc.', low: 20.56, high: 40.23},
-	{ticker: 'ORCL', name: 'Oracle Inc.', low: 50.10, high: 90.19},
-];
-
-function randomNumberBetween(min, max, decimalPlaces) {
-	// return int value
-    // return Math.floor(Math.random() * (max - min + 1) + min);
-	// return decimal value
-	let decimalValue = Math.random() * (max - min + 1) + min;
-    return decimalValue.toFixed(decimalPlaces);
-}
+const path = require('path');
+const url = require('url');
+const marketdata = require('./marketdata');
 
 function sendJson(response, statusCode, object) {
   response.setHeader('Content-Type', 'application/json');
@@ -28,11 +13,27 @@ function sendErrorJson(response, statusCode, errMessage) {
 	sendJson(response, statusCode, { error: errMessage });
 }
 
-const server = express()
-  .use(express.static(path.join(__dirname, 'public')))
+function fullUrl(req, protocol) {
+  return url.format({
+    protocol: protocol || req.protocol,
+    host: req.get('host'),
+    pathname: req.originalUrl,
+    slashes:true
+  });
+}
+
+let app = express()
+  .use(express.static(__dirname + '/public'))
+  //This is important for /public to work in links and script tags
+  .use('/public',  express.static(__dirname + '/public')) 
   .set('views', path.join(__dirname, 'views'))
   .set('view engine', 'ejs')
-  .get('/', (req, res) => res.render('pages/index'))
+  .get('/', (req, res) => {
+    res.render('pages/index', {
+      req: fullUrl(req), 
+      realtimeReq: fullUrl(req, 'ws:')
+    });
+  })
 	//   .post('/stocks', (req, res) => {
 	//   	console.info("Posting a new ticker", req.route.stack);
 	// var stock = {ticker: req.params.ticker, name: req.params.name};
@@ -40,30 +41,103 @@ const server = express()
 	//   })
   .get('/stocks', (req, res) => {
 	  console.info("Getting all ticker prices...");
-	  let stocksWithPrices = STOCKS.map(stock => {
-		  stock.price = randomNumberBetween(stock.low, stock.high, 2);
-		  return stock;
-	  });
-	  sendJson(res, 200, stocksWithPrices);
+	  sendJson(res, 200, marketdata.getAllTickerPrices());
   })
+  .get('/stocks/realtime', (req, res) => {
+ 	   console.info("Getting all Realtime ticker prices...");
+     res.render('pages/realtime', {
+       req: fullUrl(req), 
+       realtimeReq: fullUrl(req, 'ws:')
+     });
+   })
+   .get('/stocks/realtime/:ticker', (req, res) => {
+ 	  let ticker = req.params.ticker;
+     console.info("Got Realtime Ticker Req Param = ", ticker);
+     res.render('pages/realtime', {
+       req: fullUrl(req), 
+       realtimeReq: fullUrl(req, 'ws:')
+     });
+   })
   .get('/stocks/:ticker', (req, res) => {
 	  let ticker = req.params.ticker;
 	  console.info("Got Ticker Req Param = ", ticker);
-	  let found = STOCKS.filter(stock => stock.ticker === ticker)[0];
-	  if (found) {
-		  found.price = randomNumberBetween(found.low, found.high, 2);
-		  sendJson(res, 200, found);
-	  } else
-		  sendErrorJson(res, 404, 'Ticker ' + ticker + ' Not found!');
+    try {
+      let found = marketdata.getTickerPriceFor(ticker);
+      sendJson(res, 200, found);
+    } catch(e) {
+		  sendErrorJson(res, 404, e.message);    
+    }
   })
   .get('/simulateException', (req, res, next) => {
 	  const error = new Error('Oops! Something went wrong');
-  	  console.error("Simulating Server Fail by Exception...", error);
+  	console.error("Simulating Server Fail by Exception...", error);
 	  // throw new Error('Oops! Something went wrong');
 	  sendErrorJson(res, 503, error.message);
-  })
-  .listen(PORT, () => console.log(`Listening on ${ PORT }`));
+  });
+  
+const http = require('http');
+const httpServer = http.createServer();
+
+// Mount the app here
+httpServer.on('request', app);
+const WebSocketServer = require('ws').Server;
+  
+// initialize the WebSocket server instance
+const wss = new WebSocketServer({
+  server : httpServer
+});
+
+wss.getUniqueID = function () {
+  const s4 = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+  return s4() + s4() + '-' + s4();
+};
+
+
+wss.on('connection', (ws, req) => {
+    // console.info(ws);
+    ws.id = wss.getUniqueID();
+    wss.clients.forEach(client => console.log(`New Connection ClientID: ${client.id}`));
+    const reqURL = url.parse(req.url, true);
+    console.log(`Path = ${reqURL.pathname}`);
+    //connection is up, let's add a simple simple event
+    ws.on('message', message => {
+      console.log(`client [${ws.id}] => server: ${message}`);
+      if (message === 'subscribe') {
+        console.log(`Path = ${reqURL.pathname}`);
+        console.log(`Path Basename  = ${path.basename(reqURL.pathname)}`);
+        let ticker = path.basename(reqURL.pathname);
+        const marketDataObservable = (ticker === 'realtime') ? 
+                marketdata.streamAllTickerPrices() : marketdata.streamTickerPriceFor(ticker);
+        ws.marketdataSubscription = marketDataObservable.subscribe(stock => {
+          const data = JSON.stringify(stock);
+          console.log(`server => client [${ws.id}]: ${data}`);
+          ws.send(data);
+        }, error => {
+          console.error(`server => client [${ws.id}]: ${error.message}`);
+          ws.send(error.message);
+        });
+        return;
+      }
+
+      if (message === 'unsubscribe') {
+        console.log(`unsubscribing client [${ws.id}]`);
+        ws.marketdataSubscription.dispose();
+        ws.send(`server => client [${ws.id}]: unsubscribed`);
+        return;
+      }
+    });
+
+    ws.on('close', closeMessage => {
+      console.log(`client [${ws.id}] closed: ${closeMessage}`);
+    });
+    //send immediately a feedback to the incoming connection
+    ws.send('Hi there, I am a WebSocket server');
+});
+
+const PORT = process.env.PORT || 5000
+// Let us start our server
+httpServer.listen(PORT, () => console.log(`Listening on ${ PORT }`));
 
 exports.stop = function stop() {
-	server.close(() => console.log(`Shutdown server...`));
+	httpServer.close(() => console.log(`Shutdown server...`));
 }

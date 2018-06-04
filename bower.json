@@ -1,0 +1,27 @@
+{
+  "name": "stock-prices",
+  "description": "A sample Stock Prices server with Node.js app using Express 4",
+  "main": "index.js",
+  "authors": [
+    "(Dhaval Dalal)"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "node",
+    "heroku",
+    "express"
+  ],
+  "homepage": "https://github.com/DhavalDalal/stock-prices",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "3.3.1",
+    "bootstrap": "3.3.7"
+  }
+}
