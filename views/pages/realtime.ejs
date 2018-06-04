@@ -6,7 +6,7 @@
   <script>
     // This const websocketUrl is needed for the websocket.js to work.
     const websocketUrl = "<%= realtimeReq.toString() %>";
-    console.log(`webSocket URL = ${websocketUrl}`);
+    console.info(`webSocket URL = ${websocketUrl}`);
   </script>
   <script type="text/javascript" src="/public/js/websocket.js"></script>
 </head>
@@ -30,27 +30,49 @@
 <div class="container">
   <div class="alert alert-danger text-left" role="alert">
     Not for Production Use.  Only for development that need external server like the -
-	<ul>
-		<li>	<a href="https://gist.github.com/DhavalDalal/a44db41fa60f21e718426d28cedaaa4f" class="alert-link">Portfolio Java</a> workshop.
-</li>
-		<li>	<a href="https://gist.github.com/DhavalDalal/80d8f58123c1bfc6d6ce07be02f4e9ff" class="alert-link">Portfolio C#</a> workshop.
-</li>
-	</ul>
+	  <ul>
+		  <li><a href="https://gist.github.com/DhavalDalal/a44db41fa60f21e718426d28cedaaa4f" class="alert-link">Portfolio Java</a> workshop.</li>
+ 		  <li><a href="https://gist.github.com/DhavalDalal/80d8f58123c1bfc6d6ce07be02f4e9ff" class="alert-link">Portfolio C#</a> workshop.</li>
+ 	  </ul>
   </div>
   <hr>
-  <div class="row">
-    <div>
-        <button onclick="subscribe();">Start Updates</button>
-        <button onclick="unsubscribe();">Stop Updates</button>
+  <div>
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover">
+        <thead>
+              <tr>
+                <th>Name</th>
+                <th>Symbol</th>
+                <th>Low</th>
+                <th>High</th>
+                <th>Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Google Inc.</td>
+                <td>GOOG</td>
+                <td>34.56</td>
+                <td>90.45</td>
+                <td>45.56</td>
+              </tr>
+            </tbody>
+            <tbody>
+              <tr>
+                <td>Apple Inc.</td>
+                <td>AAPL</td>
+                <td>67.56</td>
+                <td>90.45</td>
+                <td>44.64</td>
+              </tr>
+            </tbody>
+      </table>
     </div>
-    <div class="quotes-ui">
-        <!-- header -->
-        <div>
-          <div class="ui-widget-header header">Symbol</div>
-          <div class="ui-widget-header header">Name</div>
-          <div class="ui-widget-header header">Price</div>
-        </div>
-  </div> <!-- row -->
+    <div class="row text-center">
+      <button class="btn btn-lg btn-success" disabled="disabled" onclick="subscribe();"><span class="glyphicon glyphicon-play-circle"></span> Start Updates</button>
+      <button class="btn btn-lg btn-danger" onclick="unsubscribe();"><span class="glyphicon glyphicon-off"></span> Stop Updates</button>
+    </div>
+  </div>
 </div>
 </body>
 </html>

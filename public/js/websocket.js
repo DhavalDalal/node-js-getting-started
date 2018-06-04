@@ -10,7 +10,7 @@ function unsubscribe() {
 
 function updateQuote(message) {
   var quoteMessage = JSON.parse(message);
-  stockQuotesViewModel.addOrUpdateQuote(quoteMessage);
+  // stockQuotesViewModel.addOrUpdateQuote(quoteMessage);
 };
 
 const ws = new WebSocket(websocketUrl);
