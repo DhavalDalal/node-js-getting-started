@@ -15,6 +15,7 @@ function sendErrorJson(response, statusCode, errMessage) {
 
 function fullUrl(req, protocol) {
   const modifiedProtocol = req.secure ? protocol.replace(':', 's:') : protocol;
+  console.log(`Modified Protocol = ${modifiedProtocol}`);
   return url.format({
     protocol: modifiedProtocol || req.protocol,
     host: req.get('host'),
