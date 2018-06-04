@@ -9,9 +9,23 @@
       </li> -->
       
     </ul>
-	<ul class="nav navbar-nav navbar-right">
-    <li class="dropdown">
-      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><span class="glyphicon glyphicon-info-sign"></span> Getting Stock Prices<span class="caret"></span></a>
+  	<ul class="nav navbar-nav navbar-right">
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><span class="glyphicon glyphicon-info-sign"></span> Realtime Stock Prices<span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li><a href="<%= realtimeReq.path %>/stocks/realtime/AAPL">Get Apple Price</a></li>
+            <li><a href="<%= realtimeReq.path %>/stocks/realtime/GOOG">Get Google Price</a></li>
+            <li><a href="<%= realtimeReq.path %>/stocks/realtime/MSFT">Get Microsoft Price</a></li>
+            <li><a href="<%= realtimeReq.path %>/stocks/realtime/ORCL">Get Oracle Price</a></li>
+            <li class="divider"></li>
+            <li><a href="<%= realtimeReq.path %>/stocks/realtime">Get All Stock Prices</a></li>
+            <li><a href="<%= realtimeReq.path %>/stocks/realtime/UNKNOWN">Get Unknown Ticker Price</a></li>
+          </ul>
+      </li>		
+  	</ul>
+	  <ul class="nav navbar-nav navbar-right">
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><span class="glyphicon glyphicon-info-sign"></span> Snapshot Stock Prices<span class="caret"></span></a>
         <ul class="dropdown-menu" role="menu">
           <li><a href="<%= req.path %>/stocks/AAPL">Get Apple Price</a></li>
           <li><a href="<%= req.path %>/stocks/GOOG">Get Google Price</a></li>
@@ -21,17 +35,10 @@
           <li><a href="<%= req.path %>/stocks">Get All Stock Prices</a></li>
           <li><a href="<%= req.path %>/stocks/UNKNOWN">Get Unknown Ticker Price</a></li>
           <li><a href="<%= req.path %>/simulateException">Simulate Server Exception</a></li>
-          <li class="divider"></li>
-          <li><a href="<%= realtimeReq.path %>/stocks/realtime/AAPL">Get Apple Price in Realtime</a></li>
-          <li><a href="<%= realtimeReq.path %>/stocks/realtime/GOOG">Get Google Price in Realtime</a></li>
-          <li><a href="<%= realtimeReq.path %>/stocks/realtime/MSFT">Get Microsoft Price in Realtime</a></li>
-          <li><a href="<%= realtimeReq.path %>/stocks/realtime/ORCL">Get Oracle Price in Realtime</a></li>
-          <li class="divider"></li>
-          <li><a href="<%= realtimeReq.path %>/stocks/realtime">Get All Stock Prices in Realtime</a></li>
-          <li><a href="<%= realtimeReq.path %>/stocks/realtime/UNKNOWN">Get Unknown Ticker Price in Realtime</a></li>
         </ul>
     </li>		
 	</ul>
+
     <!-- <ul class="nav navbar-nav navbar-right">
       <li class="navbar-right">
         <a href="https://devcenter.heroku.com"><span class="glyphicon glyphicon-book"></span> Heroku Dev Center</a>

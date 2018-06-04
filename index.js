@@ -120,7 +120,7 @@ wss.on('connection', (ws, req) => {
         let ticker = path.basename(reqURL.pathname);
         const marketDataObservable = (ticker === 'realtime') ? 
                 marketdata.streamAllTickerPrices() : marketdata.streamTickerPriceFor(ticker);
-        ws.marketdataSubscription = marketDataObservable.subscribe(stock => {
+        ws.subscription = marketDataObservable.subscribe(stock => {
           const data = JSON.stringify(stock);
           console.log(`server => client [${ws.id}]: ${data}`);
           ws.send(data);
@@ -133,17 +133,24 @@ wss.on('connection', (ws, req) => {
 
       if (message === 'unsubscribe') {
         console.log(`unsubscribing client [${ws.id}]`);
-        ws.marketdataSubscription.dispose();
+        if (ws.subscription)
+          ws.subscription.dispose();
+        
         ws.send(`server => client [${ws.id}]: unsubscribed`);
         return;
       }
     });
 
     ws.on('close', closeMessage => {
+      if (ws.subscription) 
+        ws.subscription.dispose();
+      
       console.log(`client [${ws.id}] closed: ${closeMessage}`);
     });
+    
     //send immediately a feedback to the incoming connection
-    ws.send('Hi there, I am a WebSocket server');
+    ws.send('You are connected to National Stock Prices Realtime Service!')
+    ws.send('Press >> Start Updates << to get realtime prices...');
 });
 
 const PORT = process.env.PORT || 5000
