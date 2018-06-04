@@ -17,7 +17,7 @@ function isSecure(req){
   return req.headers['x-forwarded-proto'] === 'https';
 }
 
-function securifyProtocolIfRequired(req, protocol) {
+function useSecureProtocolIfRequired(req, protocol) {
   if (protocol === undefined) {
     return req.protocol;
   }
@@ -27,7 +27,7 @@ function securifyProtocolIfRequired(req, protocol) {
 
 function fullUrl(req, protocol) {
   return url.format({
-    protocol: securifyProtocolIfRequired(req, protocol),
+    protocol: useSecureProtocolIfRequired(req, protocol),
     host: req.get('host'),
     pathname: req.originalUrl,
     slashes:true
