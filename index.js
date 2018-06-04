@@ -47,6 +47,7 @@ let app = express()
   })
   .get('/stocks/realtime', (req, res) => {
  	   console.info("Getting all Realtime ticker prices...");
+     console.info("REQUEST =", req);
      console.log("Req Secure? " + req.secure);
      res.render('pages/realtime', {
        req: fullUrl(req), 
