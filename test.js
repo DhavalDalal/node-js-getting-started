@@ -48,7 +48,8 @@ test("should return home page", function (assert) {
     assert.equal(response.statusCode, 200);
     // Assert content checks
     assert.notEqual(body.indexOf("<title>Stock Prices Server</title>"), -1);
-    assert.notEqual(body.indexOf("Getting Stock Prices"), -1);
+    assert.notEqual(body.indexOf("Snapshot Stock Prices"), -1);
+    assert.notEqual(body.indexOf("Realtime Stock Prices"), -1);
     assert.end();
   });
   // afterEach logic will run
