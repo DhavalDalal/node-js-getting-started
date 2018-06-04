@@ -1,6 +1,6 @@
 const rx = require('rx');
 
-console.log(`Market Data...`);
+// console.log(`Market Data...`);
 
 const STOCKS = [
 	{ticker: 'AAPL', name: 'Apple Inc.', low: 30.35, high: 60.45, tickMillis : { low: 2000, high: 4000 }},
