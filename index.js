@@ -17,11 +17,17 @@ function isSecure(req){
   return req.headers['x-forwarded-proto'] === 'https';
 }
 
-function fullUrl(req, protocol) {
-  const modifiedProtocol = isSecure(req) ? protocol.replace(':', 's:') : protocol;
+function securifyProtocolIfRequired(req, protocol) {
+  if (protocol === undefined) {
+    return req.protocol;
+  }
+  return isSecure(req) ? protocol.replace(':', 's:') : protocol;
   console.log(`Modified Protocol = ${modifiedProtocol}`);
+}
+
+function fullUrl(req, protocol) {
   return url.format({
-    protocol: modifiedProtocol || req.protocol,
+    protocol: securifyProtocolIfRequired(req, protocol),
     host: req.get('host'),
     pathname: req.originalUrl,
     slashes:true
