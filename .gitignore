@@ -1,6 +1,9 @@
-# Node build artifacts
+# Node build deps and artifacts
 node_modules
 npm-debug.log
+
+# Bower deps
+public/js/lib/
 
 # Local development
 *.env
