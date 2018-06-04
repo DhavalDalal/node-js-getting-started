@@ -13,8 +13,12 @@ function sendErrorJson(response, statusCode, errMessage) {
 	sendJson(response, statusCode, { error: errMessage });
 }
 
+function isSecure(req){
+  return req.headers['x-forwarded-proto'] === 'https';
+}
+
 function fullUrl(req, protocol) {
-  const modifiedProtocol = req.secure ? protocol.replace(':', 's:') : protocol;
+  const modifiedProtocol = isSecure(req) ? protocol.replace(':', 's:') : protocol;
   console.log(`Modified Protocol = ${modifiedProtocol}`);
   return url.format({
     protocol: modifiedProtocol || req.protocol,
@@ -47,7 +51,6 @@ let app = express()
   })
   .get('/stocks/realtime', (req, res) => {
  	   console.info("Getting all Realtime ticker prices...");
-     console.log("Req Secure? " + req.headers['x-forwarded-proto']);
      res.render('pages/realtime', {
        req: fullUrl(req), 
        realtimeReq: fullUrl(req, 'ws:')
