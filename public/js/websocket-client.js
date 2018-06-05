@@ -1,13 +1,12 @@
 console.log(`WebSocket URL = ${websocketUrl}`);
 
-function subscribe() {
-  ws.send("subscribe");
-  stockQuotesViewModel.subscribe();
-}
-
-function unsubscribe() {
-  ws.send("unsubscribe");
-  stockQuotesViewModel.unsubscribe();
+function toggleSubscription() {
+  stockQuotesViewModel.toggleStartStop(state => {
+    if (state === 'start') 
+      ws.send("subscribe");
+    if (state === 'stop')    
+      ws.send("unsubscribe");    
+  });
 }
 
 function updateQuote(quoteJson) {
@@ -21,7 +20,7 @@ const ws = new WebSocket(websocketUrl);
 ws.onopen = function (openMessage) {
   console.log(`websocket is connected...${openMessage}`)
   // sending a send event to websocket server
-  ws.send('connected');
+  ws.send('client ready for communication...');
 }
 
 // event emmited when receiving message 

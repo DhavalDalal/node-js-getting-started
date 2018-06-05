@@ -52,11 +52,11 @@ let app = express()
 	// sendJson(res, 200, stock);
 	//   })
   .get('/stocks', (req, res) => {
-	  console.info("Getting all ticker prices...");
+	  console.info("Got req for all ticker prices...");
 	  sendJson(res, 200, marketdata.getAllTickerPrices());
   })
   .get('/stocks/realtime', (req, res) => {
- 	   console.info("Getting all Realtime ticker prices...");
+ 	   console.info("Got Realtime req for all ticker prices...");
      res.render('pages/realtime', {
        req: fullUrl(req), 
        realtimeReq: fullUrl(req, 'ws:')
@@ -64,7 +64,7 @@ let app = express()
    })
    .get('/stocks/realtime/:ticker', (req, res) => {
  	  let ticker = req.params.ticker;
-     console.info("Got Realtime Ticker Req Param = ", ticker);
+     console.info(`Got Realtime req for ${ticker}...`);
      res.render('pages/realtime', {
        req: fullUrl(req), 
        realtimeReq: fullUrl(req, 'ws:')
@@ -72,7 +72,7 @@ let app = express()
    })
   .get('/stocks/:ticker', (req, res) => {
 	  let ticker = req.params.ticker;
-	  console.info("Got Ticker Req Param = ", ticker);
+	  console.info(`Got req for ${ticker}...`);
     try {
       let found = marketdata.getTickerPriceFor(ticker);
       sendJson(res, 200, found);
@@ -109,9 +109,11 @@ function hasSubscription(ws) {
 }
 
 wss.on('connection', (ws, req) => {
-    // console.info(ws);
     ws.id = wss.getUniqueID();
-    wss.clients.forEach(client => console.log(`New Connection ClientID: ${client.id}`));
+    console.log(`Req for new connection accepted, clientId => ${ws.id}`);
+    //wss.clients is a Set of client websocket connections
+    console.log(`Total Clients connected => ${wss.clients.size}.  See the list below:`);
+    Array.from(wss.clients).forEach((client, idx) => console.log(idx + 1, client.id));
     const reqURL = url.parse(req.url, true);
     console.log(`Path = ${reqURL.pathname}`);
     //connection is up, let's add a simple simple event
@@ -124,7 +126,6 @@ wss.on('connection', (ws, req) => {
           ws.send(alreadySubscribedMessage);
           return;
         }
-          
         
         console.log(`Path = ${reqURL.pathname}`);
         console.log(`Path Basename  = ${path.basename(reqURL.pathname)}`);
@@ -169,6 +170,7 @@ wss.on('connection', (ws, req) => {
     });
     
     //send immediately a feedback to the incoming connection
+    console.log(`client connected! clientId => [${ws.id}]`);
     ws.send('{ "ack" : "You are connected to National Stock Prices Realtime Service!"}');
     ws.send('{ "message" : "Press >> Start Updates << to get realtime prices..." }');
 });

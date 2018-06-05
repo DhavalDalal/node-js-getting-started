@@ -1,21 +1,40 @@
 StockQuotesViewModel = function() {
 	this.quotes = ko.observableArray([]);
-  this.changeStart = ko.observable();
-  this.changeStop = ko.observable();
+  this.toggleButtonText = ko.observable();
+  this.toggleButton = ko.observable();
+  this.toggleButtonGlyphicon = ko.observable();
+  this.toggleButtonState = 'stop';
+  this._setToggleButtonToStart();
 };
 
 StockQuotesViewModel.prototype._find = function(quote) {
   return this.quotes().find(quoteViewModel => quoteViewModel.ticker() === quote.ticker);
 };
 
-StockQuotesViewModel.prototype.subscribe = function() {
-  this.changeStart('disabled');
-  this.changeStop(null); //Enable 
+StockQuotesViewModel.prototype._setToggleButtonToStart = function() {
+  this.toggleButtonState = 'start';
+  this.toggleButtonText(" Subscribe");
+  this.toggleButton("btn btn-lg btn-success");
+  this.toggleButtonGlyphicon("glyphicon glyphicon-play-circle pull-left");
 };
 
-StockQuotesViewModel.prototype.unsubscribe = function() {
-  this.changeStart(null); //Enable
-  this.changeStop('disabled');
+StockQuotesViewModel.prototype._setToggleButtonToStop = function() {
+  this.toggleButtonState = 'stop';
+  this.toggleButtonText(" Unsubscribe");
+  this.toggleButton("btn btn-lg btn-danger");
+  this.toggleButtonGlyphicon("glyphicon glyphicon-off pull-left");
+};
+
+StockQuotesViewModel.prototype.toggleStartStop = function(cb) {
+  cb(this.toggleButtonState);
+  if (this.toggleButtonState === 'start') {
+    this._setToggleButtonToStop();
+    return;
+  }
+  if (this.toggleButtonState === 'stop') {
+    this._setToggleButtonToStart();
+    return;
+  }
 };
 
 StockQuotesViewModel.prototype.addOrUpdateQuote = function(quote) {

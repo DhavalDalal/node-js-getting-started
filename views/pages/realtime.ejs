@@ -25,9 +25,7 @@
     <a href="/" class="lang-logo">
       <img src="/lang-logo.png">
     </a>
-    <h1>National Stock Prices<br />
-        Real Time
-    </h1>
+    <h1>Real Time National Stock Prices</h1>
     <p>This is a sample Stock Prices Serving application based on Node.js deployed to Heroku.</p>
     <!-- <a type="button" class="btn btn-lg btn-default" href="https://devcenter.heroku.com/articles/getting-started-with-nodejs"><span class="glyphicon glyphicon-flash"></span> Getting Started with Node</a> -->
     <a type="button" class="btn btn-lg btn-primary" href="https://github.com/DhavalDalal/stock-prices"><span class="glyphicon glyphicon-download"></span> Source on GitHub</a>
@@ -74,16 +72,16 @@
           </td>
         </tr>
       </script>
-      <script type="text/javascript">
-        const stockQuotesViewModel = new StockQuotesViewModel();
-        ko.applyBindings(stockQuotesViewModel);
-      </script>
     </div>
     <div class="row text-center">
-      <button class="btn btn-lg btn-success" onclick="subscribe();" data-bind="attr: { 'disabled' : changeStart }"><span class="glyphicon glyphicon-play-circle"></span> Start Updates</button>
-      <button class="btn btn-lg btn-danger" onclick="unsubscribe();" data-bind="attr: { 'disabled' : changeStop }"><span class="glyphicon glyphicon-off"></span> Stop Updates</button>
-      <button class="btn btn-lg btn-danger" onclick="unsubscribe();"><span class="glyphicon glyphicon-off"></span> Stop Updates</button>
+      <button onclick="toggleSubscription();" data-bind="attr: { class: toggleButton }">
+        <span data-bind="attr: { class: toggleButtonGlyphicon }, text: toggleButtonText"></span>
+      </button>
     </div>
+    <script type="text/javascript">
+      const stockQuotesViewModel = new StockQuotesViewModel();
+      ko.applyBindings(stockQuotesViewModel);
+    </script>
   </div>
 </div>
 </body>
