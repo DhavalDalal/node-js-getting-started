@@ -53,29 +53,7 @@ StockQuotesViewModel.prototype.addOrUpdateQuote = function(quote) {
 	} else {
 		const oldPrice = oldQuoteViewModel.price(); 
 		const currentPrice = Number(quote.price).toFixed(2);
-    curQuoteViewModel.change(Number((oldPrice - currentPrice) * -1).toFixed(2));
+    curQuoteViewModel.updateChange(oldPrice);
     this.quotes.replace(oldQuoteViewModel, curQuoteViewModel);
-		this._updateChangeClasses(curQuoteViewModel, oldPrice, currentPrice);
 	}
 };
-
-StockQuotesViewModel.prototype._updateChangeClasses = function(quoteViewModel, oldPrice, currentPrice) {
-	if(oldPrice > currentPrice) {
-		quoteViewModel.changeColor('danger');
-    quoteViewModel.changeDirection('glyphicon glyphicon-arrow-down');
-		return;
-	}
-	 
-	if(oldPrice < currentPrice) {
-		quoteViewModel.changeColor('success');
-		quoteViewModel.changeDirection('glyphicon glyphicon-arrow-up');
-		return;
-	} 
-	
-	if(oldPrice === currentPrice) {
-    quoteViewModel.changeColor('');
-		quoteViewModel.changeDirection('');
-		return;
-	} 
-};
-
