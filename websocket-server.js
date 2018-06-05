@@ -24,25 +24,22 @@ function sendMessageToClient(ws, stringifiedMsgJson) {
 	ws.send(stringifiedMsgJson);
 }
 
-function listAllConnectedClients(wss) {
+function showConnectedClientsStats(wss) {
 	//wss.clients is a Set of client websocket connections
+	console.log("================<< CONNECTED CLIENT STATS >>====================");
 	console.log(`Total Clients connected => ${wss.clients.size}.  See the list below:`);
-	Array.from(wss.clients).forEach((client, idx) => console.log(idx + 1, client.id));
+	Array.from(wss.clients).forEach((client, idx) => console.log(`${idx + 1}. ${client.id}`));
+	console.log("==============<< END CONNECTED CLIENT STATS >>==================");
 }
 
 function subscribeToMarketData(ws, ticker) {
 	const marketDataObservable = (ticker === 'realtime') ?
 		marketdata.streamAllTickerPrices() : marketdata.streamTickerPriceFor(ticker);
-	const subscribeAckMessage = `{ "ack" : "Subscribing to market data for receiving...${(ticker === 'realtime') ? 'all' : ticker} prices."}`;
-	sendMessageToClient(ws, subscribeAckMessage);
+	sendMessageToClient(ws, `{ "ack" : "Subscribing to market data for receiving...${(ticker === 'realtime') ? 'all' : ticker} prices."}`);
 	//Attach subscription to ws connection
-	ws.subscription = marketDataObservable.subscribe(stock => {
-		const data = JSON.stringify(stock);
-		sendMessageToClient(ws, data);
-	}, error => {
-		const errorMessage = `{ "error" : "${error.message}" }`;
-		sendMessageToClient(ws, errorMessage);
-	});
+	ws.subscription = marketDataObservable.subscribe(
+		stock => sendMessageToClient(ws, JSON.stringify(stock)), 
+		error => sendMessageToClient(ws, `{ "error" : "${error.message}" }`));
 }
 
 module.exports = {
@@ -52,7 +49,7 @@ module.exports = {
 
 		wss.on('connection', (ws, req) => {
 			ws.id = getUniqueID();
-			listAllConnectedClients(wss);
+			showConnectedClientsStats(wss);
 			console.log(`Req for new connection accepted, clientId => ${ws.id}`);
 			const reqURL = url.parse(req.url, true);
 			console.log(`Path = ${reqURL.pathname}`);
@@ -61,8 +58,7 @@ module.exports = {
 				console.log(`client [${ws.id}] => server: ${message}`);
 				if (message === 'subscribe') {
 					if (hasSubscription(ws)) {
-						const alreadySubscribedMessage = `{ "error" : "Cannot Subscribe again...already subscribed!" }`;
-						sendMessageToClient(ws, alreadySubscribedMessage);
+						sendMessageToClient(ws, `{ "error" : "Cannot Subscribe again...already subscribed!" }`);
 						return;
 					}
 					console.log(`Path = ${reqURL.pathname}`);
@@ -74,8 +70,7 @@ module.exports = {
 
 				if (message === 'unsubscribe') {
 					unsubscribeAndRemoveSubscriptionIfPresent(ws);
-					const unsubscribeAckMessage = `{ "ack" : "Unsubscribed."}`;
-					sendMessageToClient(ws, unsubscribeAckMessage);
+					sendMessageToClient(ws, `{ "ack" : "Unsubscribed."}`);
 					return;
 				}
 			});

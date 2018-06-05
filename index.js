@@ -102,7 +102,7 @@ wsServer.start({
 });
 
 const PORT = process.env.PORT || 5000
-// Let us start our server
+	// Let us start our server
 httpServer.listen(PORT, () => console.log(`Listening on ${ PORT }`));
 
 exports.stop = function stop() {
