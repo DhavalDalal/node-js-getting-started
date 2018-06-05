@@ -12,9 +12,6 @@
   <script type="text/javascript" src="/public/js/lib/knockoutjs/dist/knockout.js"></script>
   <script type="text/javascript" src="/public/js/QuoteViewModel.js"></script>
   <script type="text/javascript" src="/public/js/StockQuotesViewModel.js"></script>
-  <script type="text/javascript">
-
-  </script>
 </head>
 
 <body>
@@ -32,7 +29,7 @@
   </div>
 </div>
 <div class="container">
-  <div class="alert alert-danger text-left" role="alert">
+  <div class="alert alert-warning text-left" role="alert">
     Not for Production Use.  Only for development that need external server like the -
 	  <ul>
 		  <li><a href="https://gist.github.com/DhavalDalal/a44db41fa60f21e718426d28cedaaa4f" class="alert-link">Portfolio Java</a> workshop.</li>
@@ -42,9 +39,9 @@
   <hr>
   <div>
     <div class="table-responsive">
-      <table class="table table-bordered table-hover table-striped table-condensed">
+      <table id="stock-prices" class="table table-hover table-striped" style="width:100%">
         <thead>
-          <tr class="info">
+          <tr>
             <th>Name</th>
             <th>Symbol</th>
             <th>Low</th>
@@ -54,7 +51,7 @@
           </tr>
         </thead>
         <!-- quotes rows holder -->
-        <tbody id="sortable" data-bind="template: { name: 'quotesTemplate', foreach: quotes }">
+        <tbody data-bind="template: { name: 'quotesTemplate', foreach: quotes }">
         </tbody>
       </table>
       <script type="text/html" id="quotesTemplate">
@@ -74,7 +71,7 @@
       </script>
     </div>
     <div class="row text-center">
-      <button onclick="toggleSubscription();" data-bind="attr: { class: toggleButton }">
+      <button id="toggleSubscriptionButton" onclick="toggleSubscription();" data-bind="attr: { class: toggleButton }">
         <span data-bind="attr: { class: toggleButtonGlyphicon }, text: toggleButtonText"></span>
       </button>
     </div>

@@ -4,17 +4,17 @@ const rx = require('rx');
 const STOCKS = [{
 	ticker: 'AAPL',
 	name: 'Apple Inc.',
-	low: 30.35,
+	low: 50.35,
 	high: 60.45,
 	tickMillis: {
 		low: 2000,
-		high: 4000
+		high: 3000
 	}
 }, {
 	ticker: 'GOOG',
 	name: 'Google Inc.',
 	low: 90.67,
-	high: 160.34,
+	high: 120.34,
 	tickMillis: {
 		low: 1000,
 		high: 2000
@@ -23,21 +23,32 @@ const STOCKS = [{
 	ticker: 'MSFT',
 	name: 'Microsoft Inc.',
 	low: 20.56,
-	high: 40.23,
+	high: 34.23,
 	tickMillis: {
 		low: 3000,
-		high: 7000
+		high: 4000
 	}
 }, {
 	ticker: 'ORCL',
 	name: 'Oracle Inc.',
-	low: 50.10,
-	high: 90.19,
+	low: 65.10,
+	high: 80.19,
 	tickMillis: {
 		low: 4000,
+		high: 8000
+	}
+}, 
+{
+	ticker: 'YHOO',
+	name: 'Yahoo Inc.',
+	low: 20.10,
+	high: 35.19,
+	tickMillis: {
+		low: 8000,
 		high: 10000
 	}
-}, ];
+}
+];
 
 const randomNumberBetween = function(min, max, decimalPlaces = 0) {
 	// return Math.floor(Math.random() * (max - min + 1) + min);
