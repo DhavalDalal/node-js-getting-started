@@ -21,12 +21,14 @@ const randomNumberBetween = function(min, max, decimalPlaces = 0) {
 
 module.exports = {
   getAllTickerPrices : function() {
+    console.log(`getAllTickerPrices()`);
     return STOCKS.map(stock => {
     		  stock.price = randomNumberBetween(stock.low, stock.high, 2);
     		  return stock;
     });
   },
   getTickerPriceFor: function(ticker) {
+    console.log(`getTickerPriceFor(${ticker})`);
 	  const found = this.getAllTickerPrices().filter(stock => stock.ticker === ticker)[0];
 	  if (found) 
 		  return found;

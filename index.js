@@ -104,6 +104,9 @@ wss.getUniqueID = function () {
   return s4() + s4() + '-' + s4();
 };
 
+function hasSubscription(ws) {
+  return ws.subscription !== undefined;
+}
 
 wss.on('connection', (ws, req) => {
     // console.info(ws);
@@ -115,42 +118,59 @@ wss.on('connection', (ws, req) => {
     ws.on('message', message => {
       console.log(`client [${ws.id}] => server: ${message}`);
       if (message === 'subscribe') {
+        if (hasSubscription(ws)) {
+          const alreadySubscribedMessage = `{ "error" : "Cannot Subscribe again...already subscribed!" }`;
+          console.error(`server => client [${ws.id}]: ${alreadySubscribedMessage}`);
+          ws.send(alreadySubscribedMessage);
+          return;
+        }
+          
+        
         console.log(`Path = ${reqURL.pathname}`);
         console.log(`Path Basename  = ${path.basename(reqURL.pathname)}`);
         let ticker = path.basename(reqURL.pathname);
         const marketDataObservable = (ticker === 'realtime') ? 
                 marketdata.streamAllTickerPrices() : marketdata.streamTickerPriceFor(ticker);
+        const subscribingMessage = `{ "ack" : "Subscribing to receiving...${(ticker === 'realtime') ? 'all' : ticker} prices."}`; 
+        ws.send(subscribingMessage);
         ws.subscription = marketDataObservable.subscribe(stock => {
           const data = JSON.stringify(stock);
           console.log(`server => client [${ws.id}]: ${data}`);
           ws.send(data);
         }, error => {
-          console.error(`server => client [${ws.id}]: ${error.message}`);
-          ws.send(error.message);
+          const errorMessage = `{ "error" : "${error.message}" }`;
+          console.error(`server => client [${ws.id}]: ${errorMessage}`);
+          ws.send(errorMessage);
         });
         return;
       }
 
       if (message === 'unsubscribe') {
-        console.log(`unsubscribing client [${ws.id}]`);
-        if (ws.subscription)
+        console.log(`unsubscribing client [${ws.id}]...`);
+        if (hasSubscription(ws)) {
           ws.subscription.dispose();
+          delete ws.subscription;
+        }
         
-        ws.send(`server => client [${ws.id}]: unsubscribed`);
+        console.log(`Unsubscribed client [${ws.id}]`);
+        const unsubscribingMessage = `{ "ack" : "Unsubscribed."}`; 
+        ws.send(unsubscribingMessage);
         return;
       }
     });
 
     ws.on('close', closeMessage => {
-      if (ws.subscription) 
+      if (hasSubscription(ws)) {
         ws.subscription.dispose();
+        delete ws.subscription;
+      } 
       
       console.log(`client [${ws.id}] closed: ${closeMessage}`);
     });
     
     //send immediately a feedback to the incoming connection
-    ws.send('You are connected to National Stock Prices Realtime Service!')
-    ws.send('Press >> Start Updates << to get realtime prices...');
+    ws.send('{ "ack" : "You are connected to National Stock Prices Realtime Service!"}');
+    ws.send('{ "message" : "Press >> Start Updates << to get realtime prices..." }');
 });
 
 const PORT = process.env.PORT || 5000

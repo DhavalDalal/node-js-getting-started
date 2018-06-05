@@ -8,7 +8,13 @@
     const websocketUrl = "<%= realtimeReq.toString() %>";
     console.info(`webSocket URL = ${websocketUrl}`);
   </script>
-  <script type="text/javascript" src="/public/js/websocket.js"></script>
+  <script type="text/javascript" src="/public/js/websocket-client.js"></script>
+  <script type="text/javascript" src="/public/js/lib/knockoutjs/dist/knockout.js"></script>
+  <script type="text/javascript" src="/public/js/QuoteViewModel.js"></script>
+  <script type="text/javascript" src="/public/js/StockQuotesViewModel.js"></script>
+  <script type="text/javascript">
+
+  </script>
 </head>
 
 <body>
@@ -38,39 +44,45 @@
   <hr>
   <div>
     <div class="table-responsive">
-      <table class="table table-bordered table-hover">
+      <table class="table table-bordered table-hover table-striped table-condensed">
         <thead>
-              <tr>
-                <th>Name</th>
-                <th>Symbol</th>
-                <th>Low</th>
-                <th>High</th>
-                <th>Price</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Google Inc.</td>
-                <td>GOOG</td>
-                <td>34.56</td>
-                <td>90.45</td>
-                <td>45.56</td>
-              </tr>
-            </tbody>
-            <tbody>
-              <tr>
-                <td>Apple Inc.</td>
-                <td>AAPL</td>
-                <td>67.56</td>
-                <td>90.45</td>
-                <td>44.64</td>
-              </tr>
-            </tbody>
+          <tr class="info">
+            <th>Name</th>
+            <th>Symbol</th>
+            <th>Low</th>
+            <th>High</th>
+            <th>Price</th>
+            <th>Change</th>
+          </tr>
+        </thead>
+        <!-- quotes rows holder -->
+        <tbody id="sortable" data-bind="template: { name: 'quotesTemplate', foreach: quotes }">
+        </tbody>
       </table>
+      <script type="text/html" id="quotesTemplate">
+        <tr>
+          <td data-bind="text: name"></td>
+          <td data-bind="text: ticker"></td>
+          <td data-bind="text: low"></td>
+          <td data-bind="text: high"></td>
+          <td data-bind="text: price"></td>
+          <td data-bind="attr : {'class': changeColor }">
+            <div>
+              <div style="float: left" data-bind="text: change"></div>
+              <div style="float: right" data-bind="attr: {'class': changeDirection }"></div>
+            </div>
+          </td>
+        </tr>
+      </script>
+      <script type="text/javascript">
+        const stockQuotesViewModel = new StockQuotesViewModel();
+        ko.applyBindings(stockQuotesViewModel);
+      </script>
     </div>
     <div class="row text-center">
-      <button class="btn btn-lg btn-success" onclick="subscribe();"><span class="glyphicon glyphicon-play-circle"></span> Start Updates</button>
-      <button class="btn btn-lg btn-danger" disabled="disabled" onclick="unsubscribe();"><span class="glyphicon glyphicon-off"></span> Stop Updates</button>
+      <button class="btn btn-lg btn-success" onclick="subscribe();" data-bind="attr: { 'disabled' : changeStart }"><span class="glyphicon glyphicon-play-circle"></span> Start Updates</button>
+      <button class="btn btn-lg btn-danger" onclick="unsubscribe();" data-bind="attr: { 'disabled' : changeStop }"><span class="glyphicon glyphicon-off"></span> Stop Updates</button>
+      <button class="btn btn-lg btn-danger" onclick="unsubscribe();"><span class="glyphicon glyphicon-off"></span> Stop Updates</button>
     </div>
   </div>
 </div>
