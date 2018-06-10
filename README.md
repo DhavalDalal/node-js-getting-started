@@ -24,9 +24,24 @@ $ heroku create
 $ git push heroku master
 $ heroku open
 ```
+
 or
 
 [![Deploy to Heroku](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
+
+or if you already have app created on heroku, simply add remote
+
+```
+git remote add heroku git@heroku.com:project.git
+git remote -v
+```
+
+or
+
+```
+heroku git:remote -a project
+```
+
 
 ## Documentation
 
