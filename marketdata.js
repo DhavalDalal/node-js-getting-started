@@ -1,4 +1,5 @@
-const rx = require('rx');
+const rx = require('rxjs');
+const { map, filter, flatMap, concatMap, switchMap, reduce, merge } = require('rxjs/operators');
 
 // console.debug(`Market Data...`);
 const STOCKS = [{
@@ -80,21 +81,17 @@ module.exports = {
 		console.log(`streamTickerPriceFor(${ticker})`);
 		try {
 			const stock = this.getTickerPriceFor(ticker);
-			return rx.Observable.generateWithRelativeTime(stock,
-				w => true, // don't terminate
-				stock => {
-					stock.price = randomNumberBetween(stock.low, stock.high, 2);
-					return stock;
-				}, // next function
-				stock => stock, // return value
-				() => randomNumberBetween(stock.tickMillis.low, stock.tickMillis.high) // tick every millis
-			)
+      return rx.timer(randomNumberBetween(stock.tickMillis.low, stock.tickMillis.high), randomNumberBetween(stock.tickMillis.low, stock.tickMillis.high))
+        .pipe(map(() => {
+          stock.price = randomNumberBetween(stock.low, stock.high, 2);
+          return stock;
+      })); 
 		} catch (e) {
-			return rx.Observable.throw(e);
+			return rx.throwError(e);
 		}
 	},
 	streamAllTickerPrices: function() {
 		console.log(`streamAllTickerPrices()`);
-		return STOCKS.map(stock => this.streamTickerPriceFor(stock.ticker)).reduce((o1, o2) => o1.merge(o2));
+		return STOCKS.map(stock => this.streamTickerPriceFor(stock.ticker)).reduce((o1, o2) => o1.pipe(merge(o2)));
 	}
 }

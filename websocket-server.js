@@ -14,7 +14,7 @@ function hasSubscription(ws) {
 
 function unsubscribeAndRemoveSubscriptionIfPresent(ws) {
 	if (hasSubscription(ws)) {
-		ws.subscription.dispose();
+		ws.subscription.unsubscribe();
 		delete ws.subscription;
 	}
 }
