@@ -15,6 +15,7 @@ function hasSubscription(ws) {
 function unsubscribeAndRemoveSubscriptionIfPresent(ws) {
 	if (hasSubscription(ws)) {
 		ws.subscription.unsubscribe();
+  	console.log(`{ "ack" : "Unsubscribed."}`);
 		delete ws.subscription;
 	}
 }

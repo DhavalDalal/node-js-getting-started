@@ -1,5 +1,5 @@
 const rx = require('rxjs');
-const { map, filter, flatMap, concatMap, switchMap, reduce, merge } = require('rxjs/operators');
+const { map, filter, flatMap, concatMap, switchMap, reduce, merge, tap } = require('rxjs/operators');
 
 // console.debug(`Market Data...`);
 const STOCKS = [{
@@ -61,31 +61,51 @@ const randomNumberBetween = function(min, max, decimalPlaces = 0) {
 		return Number.parseFloat(decimalValue.toFixed(decimalPlaces));
 }
 
+const getAllTickerPrices = function() {
+	console.log(`getAllTickerPrices()`);
+	const stocks = [];
+	STOCKS.forEach(stock => {
+		stock.price = randomNumberBetween(stock.low, stock.high, 2);
+		stocks.push(stock);
+	});
+	return stocks;
+}
+
+const getTickerPriceFor = function(ticker) {
+	console.log(`getTickerPriceFor(${ticker})`);
+	const found = this.getAllTickerPrices().filter(stock => stock.ticker === ticker)[0];
+	if (found)
+		return found;
+	else
+		throw new Error(`Ticker ${ticker} Not found!`);
+}
+
 module.exports = {
-	getAllTickerPrices: function() {
-		console.log(`getAllTickerPrices()`);
-		return STOCKS.map(stock => {
-			stock.price = randomNumberBetween(stock.low, stock.high, 2);
-			return stock;
-		});
-	},
-	getTickerPriceFor: function(ticker) {
-		console.log(`getTickerPriceFor(${ticker})`);
-		const found = this.getAllTickerPrices().filter(stock => stock.ticker === ticker)[0];
-		if (found)
-			return found;
-		else
-			throw new Error(`Ticker ${ticker} Not found!`);
-	},
+	getTickerPriceFor: getTickerPriceFor,
+	getAllTickerPrices: getAllTickerPrices,
 	streamTickerPriceFor: function(ticker) {
 		console.log(`streamTickerPriceFor(${ticker})`);
 		try {
 			const stock = this.getTickerPriceFor(ticker);
-      return rx.timer(randomNumberBetween(stock.tickMillis.low, stock.tickMillis.high), randomNumberBetween(stock.tickMillis.low, stock.tickMillis.high))
-        .pipe(map(() => {
-          stock.price = randomNumberBetween(stock.low, stock.high, 2);
-          return stock;
-      })); 
+			return new rx.Observable(observer => {
+			  let timeout = null;
+			  // recursive to send a random price to the subscriber after a random tick delay
+			  // we never send complete or error
+			  (function nextValue() {
+			    timeout = setTimeout(
+			      () => {
+							stock.price = randomNumberBetween(stock.low, stock.high, 2);
+			        observer.next(stock);
+			        nextValue();
+			      },
+						// tick every millis
+			      randomNumberBetween(stock.tickMillis.low, stock.tickMillis.high) 
+			    );
+			  })();
+
+			  // on unsubscribe
+			  return () => clearTimeout(timeout);
+			});
 		} catch (e) {
 			return rx.throwError(e);
 		}
