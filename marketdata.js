@@ -1,5 +1,5 @@
 const rx = require('rxjs');
-const { map, filter, flatMap, concatMap, switchMap, reduce, merge, tap } = require('rxjs/operators');
+const { merge, share } = require('rxjs/operators');
 
 // console.debug(`Market Data...`);
 const STOCKS = [{
@@ -59,7 +59,7 @@ const randomNumberBetween = function(min, max, decimalPlaces = 0) {
 		return Number.parseInt(decimalValue.toFixed(decimalPlaces));
 	else
 		return Number.parseFloat(decimalValue.toFixed(decimalPlaces));
-}
+};
 
 const getAllTickerPrices = function() {
 	console.log(`getAllTickerPrices()`);
@@ -69,46 +69,67 @@ const getAllTickerPrices = function() {
 		stocks.push(stock);
 	});
 	return stocks;
-}
+};
 
 const getTickerPriceFor = function(ticker) {
 	console.log(`getTickerPriceFor(${ticker})`);
-	const found = this.getAllTickerPrices().filter(stock => stock.ticker === ticker)[0];
+	const found = getAllTickerPrices().filter(stock => stock.ticker === ticker)[0];
 	if (found)
 		return found;
 	else
 		throw new Error(`Ticker ${ticker} Not found!`);
-}
+};
+
+const initializeTickerStreamFor = function(ticker, shared = true) {
+	console.log(`initializeTickerStreamFor(${ticker})`);
+	try {
+		const stock = getTickerPriceFor(ticker);
+		const tickerStream = new rx.Observable(observer => {
+		  let timeout = null;
+		  // recursive to send a random price to the subscriber after a random tick delay
+		  // we never send complete or error
+		  (function nextValue() {
+		    timeout = setTimeout(
+		      () => {
+						stock.price = randomNumberBetween(stock.low, stock.high, 2);
+		        observer.next(stock);
+		        nextValue();
+		      },
+					// tick every millis
+		      randomNumberBetween(stock.tickMillis.low, stock.tickMillis.high) 
+		    );
+		  })();
+		  // on unsubscribe
+		  return () => clearTimeout(timeout);
+		});
+		return (shared === true) ? tickerStream.pipe(share()) : tickerStream;
+	} catch (e) {
+		return rx.throwError(e);
+	}
+};
+
+const initializeTickerStreams = function (shared) {
+	const streams = new Map();
+	getAllTickerPrices().forEach(stock => {
+		const stream = initializeTickerStreamFor(stock.ticker, shared);
+		streams.set(stock.ticker, stream);
+	});
+	return streams;
+};
+
+console.log(`Creating Ticker streams...`);
+const TICKERSTREAMS = initializeTickerStreams();
+console.log(TICKERSTREAMS);
 
 module.exports = {
 	getTickerPriceFor: getTickerPriceFor,
 	getAllTickerPrices: getAllTickerPrices,
 	streamTickerPriceFor: function(ticker) {
 		console.log(`streamTickerPriceFor(${ticker})`);
-		try {
-			const stock = this.getTickerPriceFor(ticker);
-			return new rx.Observable(observer => {
-			  let timeout = null;
-			  // recursive to send a random price to the subscriber after a random tick delay
-			  // we never send complete or error
-			  (function nextValue() {
-			    timeout = setTimeout(
-			      () => {
-							stock.price = randomNumberBetween(stock.low, stock.high, 2);
-			        observer.next(stock);
-			        nextValue();
-			      },
-						// tick every millis
-			      randomNumberBetween(stock.tickMillis.low, stock.tickMillis.high) 
-			    );
-			  })();
-
-			  // on unsubscribe
-			  return () => clearTimeout(timeout);
-			});
-		} catch (e) {
-			return rx.throwError(e);
-		}
+		if (TICKERSTREAMS.has(ticker)) {
+			return TICKERSTREAMS.get(ticker);
+		} 
+		return rx.throwError(e);
 	},
 	streamAllTickerPrices: function() {
 		console.log(`streamAllTickerPrices()`);
