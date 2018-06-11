@@ -15,7 +15,7 @@ function hasSubscription(ws) {
 function unsubscribeAndRemoveSubscriptionIfPresent(ws) {
 	if (hasSubscription(ws)) {
 		ws.subscription.unsubscribe();
-  	console.log(`{ "ack" : "Unsubscribed."}`);
+  	console.log(`client [${ws.id}]: Unsubscribed`);
 		delete ws.subscription;
 	}
 }
@@ -36,7 +36,7 @@ function showConnectedClientsStats(wss) {
 function subscribeToMarketData(ws, ticker) {
 	const marketDataObservable = (ticker === 'realtime') ?
 		marketdata.streamAllTickerPrices() : marketdata.streamTickerPriceFor(ticker);
-	sendMessageToClient(ws, `{ "ack" : "Subscribing to market data for receiving...${(ticker === 'realtime') ? 'all' : ticker} prices."}`);
+ 	sendMessageToClient(ws, `{ "ack" : "Subscribing to market data for receiving...${(ticker === 'realtime') ? 'all' : ticker} prices."}`);
 	//Attach subscription to ws connection
 	ws.subscription = marketDataObservable.subscribe(
 		stock => sendMessageToClient(ws, JSON.stringify(stock)), 
