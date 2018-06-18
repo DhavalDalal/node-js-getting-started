@@ -83,7 +83,7 @@ module.exports = {
 
 			//send immediately a feedback to the incoming connection
 			sendMessageToClient(ws, `{ "ack" : "You are connected with Id [${ws.id}] to the National Stock Prices Realtime Service!"}`);
-			sendMessageToClient(ws, '{ "message" : "client to send message - 'subscribe' to get realtime prices and to stop receiving updates send message - 'unsubscribe'" }');
+			sendMessageToClient(ws, '{ "message" : "client to send message - \'subscribe\' to get realtime prices and to stop receiving updates send message - \'unsubscribe\'" }');
 		});
 	}
 }
