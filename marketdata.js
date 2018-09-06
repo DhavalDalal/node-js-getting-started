@@ -12,6 +12,15 @@ const STOCKS = [{
 		high: 3000
 	}
 }, {
+	ticker: 'AMZN',
+	name: 'Amazon Inc.',
+	low: 23.35,
+	high: 34.45,
+	tickMillis: {
+		low: 1000,
+		high: 1700
+	}
+}, {
 	ticker: 'GOOG',
 	name: 'Google Inc.',
 	low: 90.67,
