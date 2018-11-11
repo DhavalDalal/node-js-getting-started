@@ -81,7 +81,8 @@ module.exports = {
   					return;
   				  }
 				} catch (e) {
-				  sendMessageToClient(ws, `{ "error" : "Send command as stringified JSON. Format \{ 'command': 'xxx', 'args': [arg1, arg2, ...] \} or \{ 'command': 'xxx' \}.`);
+				  sendMessageToClient(ws, `{ "error" : "Send command as stringified JSON." }`);
+				  sendMessageToClient(ws, JSON.stringify({ "command_format": [{ command: 'xxx', args: '[arg1, arg2, ...]' }, { command: 'xxx' }] }));
 				  console.debug(`Problem => ${e}`);
 				}
 			});
