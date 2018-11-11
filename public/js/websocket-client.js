@@ -3,11 +3,11 @@ console.log(`WebSocket URL = ${websocketUrl}`);
 function toggleSubscription() {
 	stockQuotesViewModel.toggleStartStop(state => {
 		if (state === 'start')
-			ws.send("subscribe");
+			ws.send('{ "command" : "subscribe" }');
 		if (state === 'stop')
-			ws.send("unsubscribe");
+			ws.send('{ "command" : "unsubscribe" }');
 	});
-}
+};
 
 function updateQuote(quoteJson) {
 	console.log("Updating Quote..." + quoteJson);
@@ -25,7 +25,7 @@ const ws = new WebSocket(websocketUrl);
 ws.onopen = function(openMessage) {
 	console.log(`websocket is connected...${openMessage}`)
 	// sending a send event to websocket server
-	ws.send('client ready for communication...');
+	ws.send('{ "command": "echo", "args": [200, "client ready for communication..."]}');
 }
 
 // event emmited when receiving message 

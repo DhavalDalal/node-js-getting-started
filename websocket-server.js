@@ -57,22 +57,32 @@ module.exports = {
 			//connection is up, let's add a simple simple event
 			ws.on('message', message => {
 				console.log(`client [${ws.id}] => server: ${message}`);
-				if (message === 'subscribe') {
-					if (hasSubscription(ws)) {
-						sendMessageToClient(ws, `{ "error" : "Cannot Subscribe again...already subscribed!" }`);
-						return;
-					}
-					console.log(`Path = ${reqURL.pathname}`);
-					// console.log(`Path Basename  = ${path.basename(reqURL.pathname)}`);
-					let ticker = path.basename(reqURL.pathname);
-					subscribeToMarketData(ws, ticker);
-					return;
-				}
+				try {
+				  const {command, args} = JSON.parse(message);
+   				  if (command === 'echo') {
+					  sendMessageToClient(ws, `{ "ack" : ${JSON.stringify(args)}}`);
+					  return; 
+				  }
+  				  if (command === 'subscribe') {
+  					if (hasSubscription(ws)) {
+  					  sendMessageToClient(ws, `{ "error" : "Cannot Subscribe again...already subscribed!" }`);
+  					  return;
+  					}
+  					console.log(`Path = ${reqURL.pathname}`);
+  					// console.log(`Path Basename  = ${path.basename(reqURL.pathname)}`);
+  					let ticker = path.basename(reqURL.pathname);
+  					subscribeToMarketData(ws, ticker);
+  					return;
+  				  }
 
-				if (message === 'unsubscribe') {
-					unsubscribeAndRemoveSubscriptionIfPresent(ws);
-					sendMessageToClient(ws, `{ "ack" : "Unsubscribed."}`);
-					return;
+  				  if (command === 'unsubscribe') {
+  					unsubscribeAndRemoveSubscriptionIfPresent(ws);
+  					sendMessageToClient(ws, `{ "ack" : "Unsubscribed."}`);
+  					return;
+  				  }
+				} catch (e) {
+				  sendMessageToClient(ws, `{ "error" : "Send command as stringified JSON. Format \{ 'command': 'xxx', 'args': [arg1, arg2, ...] \} or \{ 'command': 'xxx' \}.`);
+				  console.debug(`Problem => ${e}`);
 				}
 			});
 
@@ -83,7 +93,7 @@ module.exports = {
 
 			//send immediately a feedback to the incoming connection
 			sendMessageToClient(ws, `{ "ack" : "You are connected with Id [${ws.id}] to the National Stock Prices Realtime Service!"}`);
-			sendMessageToClient(ws, '{ "message" : "client to send message - \'subscribe\' to get realtime prices and to stop receiving updates send message - \'unsubscribe\'" }');
+			// sendMessageToClient(ws, `{ "message" : "client to send message - \{ 'command': 'subscribe' \} to get realtime prices and to stop receiving updates send message - \{ 'command': 'unsubscribe' \} }`);
 		});
 	}
 }
