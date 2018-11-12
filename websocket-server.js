@@ -43,6 +43,10 @@ function subscribeToMarketData(ws, ticker) {
 		error => sendMessageToClient(ws, `{ "error" : "${error.message}" }`));
 }
 
+function sendHelpMessageToClient(ws) {
+  sendMessageToClient(ws, JSON.stringify({ "message": "client to send message using the commands as per required command_formats", "command_formats": [{ command: 'xxx', args: '[arg1, arg2, ...]' }, { command: 'xxx' }] }));
+}
+
 module.exports = {
 	start: function(config) {
 		// initialize the WebSocket server instance
@@ -82,7 +86,7 @@ module.exports = {
   				  }
 				} catch (e) {
 				  sendMessageToClient(ws, `{ "error" : "Send command as stringified JSON." }`);
-				  sendMessageToClient(ws, JSON.stringify({ "command_format": [{ command: 'xxx', args: '[arg1, arg2, ...]' }, { command: 'xxx' }] }));
+          sendHelpMessageToClient(ws);
 				  console.debug(`Problem => ${e}`);
 				}
 			});
@@ -94,7 +98,7 @@ module.exports = {
 
 			//send immediately a feedback to the incoming connection
 			sendMessageToClient(ws, `{ "ack" : "You are connected with Id [${ws.id}] to the National Stock Prices Realtime Service!"}`);
-			// sendMessageToClient(ws, `{ "message" : "client to send message - \{ 'command': 'subscribe' \} to get realtime prices and to stop receiving updates send message - \{ 'command': 'unsubscribe' \} }`);
+      sendHelpMessageToClient(ws);
 		});
 	}
 }
