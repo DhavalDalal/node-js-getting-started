@@ -1,6 +1,7 @@
 # Node build deps and artifacts
 node_modules
 npm-debug.log
+package-lock.json
 
 # Bower deps
 public/js/lib/
