@@ -55,7 +55,9 @@ let app = express()
 	//   })
 	.get('/stocks', (req, res) => {
 		console.info("Got req for all ticker prices...");
-		sendJson(res, 200, marketdata.getAllTickerPrices());
+    marketdata.getAllTickerPrices()
+      .then(result => sendJson(res, 200, result))
+      .catch(error => sendErrorJson(res, 404, error.message));
 	})
 	.get('/stocks/realtime', (req, res) => {
 		console.info("Got Realtime req for all ticker prices...");
@@ -75,12 +77,9 @@ let app = express()
 	.get('/stocks/:ticker', (req, res) => {
 		let ticker = req.params.ticker;
 		console.info(`Got req for ${ticker}...`);
-		try {
-			let found = marketdata.getTickerPriceFor(ticker);
-			sendJson(res, 200, found);
-		} catch (e) {
-			sendErrorJson(res, 404, e.message);
-		}
+		marketdata.getTickerPriceFor(ticker)
+      .then(result => sendJson(res, 200, result))
+      .catch(error => sendErrorJson(res, 404, error.message));
 	})
 	.get('/simulateException', (req, res, next) => {
 		const error = new Error('Oops! Something went wrong');

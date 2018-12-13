@@ -70,6 +70,14 @@ const randomNumberBetween = function(min, max, decimalPlaces = 0) {
 		return Number.parseFloat(decimalValue.toFixed(decimalPlaces));
 };
 
+const delayInMillis = process.env.DELAY_IN_MILLIS || 250;
+
+function delay(timeInMillis, result) {
+  return new Promise((resolve, reject) => {
+	setTimeout(() => resolve(result), timeInMillis);
+  });
+}
+
 const getAllTickerPrices = function() {
 	console.log(`getAllTickerPrices()`);
 	const stocks = [];
@@ -77,14 +85,15 @@ const getAllTickerPrices = function() {
 		stock.price = randomNumberBetween(stock.low, stock.high, 2);
 		stocks.push(stock);
 	});
-	return stocks;
+  return delay(delayInMillis, stocks);
 };
 
-const getTickerPriceFor = function(ticker) {
+const getTickerPriceFor = async function(ticker) {
 	console.log(`getTickerPriceFor(${ticker})`);
-	const found = getAllTickerPrices().filter(stock => stock.ticker === ticker)[0];
+	const stocks = await getAllTickerPrices();
+  const found = stocks.filter(stock => stock.ticker === ticker)[0];
 	if (found)
-		return found;
+	  return found;
 	else
 		throw new Error(`Ticker ${ticker} Not found!`);
 };
@@ -92,7 +101,10 @@ const getTickerPriceFor = function(ticker) {
 const initializeTickerStreamFor = function(ticker, shared = true) {
 	console.log(`initializeTickerStreamFor(${ticker})`);
 	try {
-		const stock = getTickerPriceFor(ticker);
+    const stock = STOCKS.filter(stock => stock.ticker === ticker)[0];
+  	if (!stock)
+  		throw new Error(`Ticker ${ticker} Not found!`);
+    
 		const tickerStream = new rx.Observable(observer => {
 		  let timeout = null;
 		  // recursive to send a random price to the subscriber after a random tick delay
@@ -119,7 +131,8 @@ const initializeTickerStreamFor = function(ticker, shared = true) {
 
 const initializeTickerStreams = function (shared) {
 	const streams = new Map();
-	getAllTickerPrices().forEach(stock => {
+  // getAllTickerPrices().forEach(stock => {
+	STOCKS.forEach(stock => {
 		const stream = initializeTickerStreamFor(stock.ticker, shared);
 		streams.set(stock.ticker, stream);
 	});
