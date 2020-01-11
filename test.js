@@ -62,9 +62,9 @@ test("Gets All Stocks", function (assert) {
     // Successful response
     assert.equal(response.statusCode, 200);
   	const stocks = JSON.parse(body);
-	  assert.equal(stocks.length, 5);
+	  assert.equal(stocks.length, 6);
 	  const tickers = stocks.map(stock => stock.ticker);
-	  assert.deepEqual(tickers, ['AAPL', 'GOOG', 'MSFT', 'ORCL', 'YHOO']);
+	  assert.deepEqual(tickers, ['AAPL', 'AMZN', 'GOOG', 'MSFT', 'ORCL', 'YHOO']);
     // Assert content checks
     assert.end();
   });
