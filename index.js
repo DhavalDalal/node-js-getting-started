@@ -37,6 +37,7 @@ function fullUrl(req, protocol) {
 }
 
 let app = express()
+	.use(express.json())
 	.use(express.static(__dirname + '/public'))
 	//This is important for /public to work in links and script tags
 	.use('/public', express.static(__dirname + '/public'))
@@ -51,13 +52,14 @@ let app = express()
 	//   .post('/stocks', (req, res) => {
 	//   	console.info("Posting a new ticker", req.route.stack);
 	// var stock = {ticker: req.params.ticker, name: req.params.name};
+	// req.body.variable_name for 'Content-Type: application/x-www-form-urlencoded'
 	// sendJson(res, 200, stock);
 	//   })
 	.get('/stocks', (req, res) => {
 		console.info("Got req for all ticker prices...");
-    marketdata.getAllTickerPrices()
-      .then(result => sendJson(res, 200, result))
-      .catch(error => sendErrorJson(res, 404, error.message));
+        marketdata.getAllTickerPrices()
+            .then(result => sendJson(res, 200, result))
+            .catch(error => sendErrorJson(res, 404, error.message));
 	})
 	.get('/stocks/realtime', (req, res) => {
 		console.info("Got Realtime req for all ticker prices...");
@@ -78,14 +80,40 @@ let app = express()
 		let ticker = req.params.ticker;
 		console.info(`Got req for ${ticker}...`);
 		marketdata.getTickerPriceFor(ticker)
-      .then(result => sendJson(res, 200, result))
-      .catch(error => sendErrorJson(res, 404, error.message));
+		  .then(result => sendJson(res, 200, result))
+		  .catch(error => sendErrorJson(res, 404, error.message));
 	})
 	.get('/simulateException', (req, res, next) => {
 		const error = new Error('Oops! Something went wrong');
 		console.error("Simulating Server Fail by Exception...", error);
 		// throw new Error('Oops! Something went wrong');
 		sendErrorJson(res, 503, error.message);
+	})
+	.get('/config', (req, res) => {
+		console.info("Got Congifuration req...");
+		res.render('pages/config', {
+			req: fullUrl(req),
+			realtimeReq: fullUrl(req, 'ws:')
+		});
+	})
+	
+	.get('/config/resetRequestCounter', (req, res) => {
+		console.info("Got req for all ticker prices...");
+        marketdata.resetTotalRequests()
+            .then(result => sendJson(res, 200, result))
+            .catch(error => sendErrorJson(res, 500, error.message));
+	})
+    .post('/config/updateRefreshEveryRequest', (req, res) => {
+	  	console.info("Updating Refresh Every Request value", req.route.stack);
+		const refresh_stocks_every_requests = req.body.refresh_stocks_every_requests;
+		if (refresh_stocks_every_requests === undefined) {
+			const error = new Error("Correct Request_example => { 'refresh_stocks_every_requests' : 20 }");
+			sendErrorJson(res, 400, error.message);
+		} else {
+			marketdata.updateRefreshRequestCount(refresh_stocks_every_requests)
+				.then(result => sendJson(res, 200, result))
+				.catch(error => sendErrorJson(res, 500, error.message));
+		}		
 	});
 
 const http = require('http');

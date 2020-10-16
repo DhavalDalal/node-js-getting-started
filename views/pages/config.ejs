@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <% include ../partials/header.ejs %>
+</head>
+
+<body>
+  <% include ../partials/nav.ejs %>
+
+<div class="jumbotron text-center">
+  <div class="container">
+    <a href="/" class="lang-logo">
+      <img src="/lang-logo.png">
+    </a>
+    <h1>National Stock Prices</h1>
+    <h2><span class="glyphicon glyphicon-cog"></span> Settings</h2>
+	<h3>Following Parameters can be configured</h3>
+  </div>
+</div>
+<div class="container">
+  <div class="row">
+    <div class="col-md-6">
+      <h3><span class="glyphicon glyphicon-refresh"></span> Reset Total Request Count</h3>
+      <ul>
+          <li>Using command line <br>
+			  <code>curl  https://national-stock-service.herokuapp.com/config/resetRequestCounter</code> OR
+			  <a href="https://national-stock-service.herokuapp.com/config/resetRequestCounter">Click Here</a>
+		  </li>
+      </ul>
+    </div>
+    <div class="col-md-6">
+      <h3><span class="glyphicon glyphicon-wrench"></span> Change Refresh Every Request Parameter</h3>
+      <ul>
+          <li>Using command line <br>
+			  <code>curl -X POST -H 'Content-Type: application/json' -d '{ "refresh_stocks_every_requests" : 10 }' https://national-stock-service.herokuapp.com/config/updateRefreshEveryRequest</code>
+		  </li>
+      </ul>
+    </div>
+  </div> <!-- row -->
+</div>
+</body>
+</html>

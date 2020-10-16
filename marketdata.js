@@ -60,6 +60,10 @@ const STOCKS = [{
 }
 ];
 
+const delayInMillis = process.env.DELAY_IN_MILLIS || 250;
+var refreshStocksEveryRequests = process.env.REFRESH_STOCKS_EVERY_REQUESTS || 5;
+var totalRequests = 0;
+
 const randomNumberBetween = function(min, max, decimalPlaces = 0) {
 	// return Math.floor(Math.random() * (max - min + 1) + min);
 	// return decimal value
@@ -70,40 +74,57 @@ const randomNumberBetween = function(min, max, decimalPlaces = 0) {
 		return Number.parseFloat(decimalValue.toFixed(decimalPlaces));
 };
 
-const delayInMillis = process.env.DELAY_IN_MILLIS || 250;
-
-function delay(timeInMillis, result) {
+function respondAfterDelayOf(timeInMillis, result) {
   return new Promise((resolve, reject) => {
 	setTimeout(() => resolve(result), timeInMillis);
   });
 }
 
-const getAllTickerPrices = function() {
-	console.log(`getAllTickerPrices()`);
-	const stocks = [];
-	STOCKS.forEach(stock => {
+const updateRefreshRequestCount = async function (newRefreshStocksEveryRequests) {
+	console.log(`updateRefreshRequestCount(${newRefreshStocksEveryRequests})`);
+	refreshStocksEveryRequests = newRefreshStocksEveryRequests;
+	return {"refresh_stocks_every_requests": refreshStocksEveryRequests};
+}
+
+const resetTotalRequests = async function () {
+	console.log(`resetTotalRequests(), Reseting ${totalRequests} to 0`);
+	totalRequests = 0;
+	return {"total_requests": totalRequests};
+}
+
+const addOrUpdateStockPrices = function (allStocks) {
+	return allStocks.map(stock => {
 		stock.price = randomNumberBetween(stock.low, stock.high, 2);
-		stocks.push(stock);
-	});
-  return delay(delayInMillis, stocks);
+		return stock;
+	});	
+}
+
+const getAllTickerPrices = function() {
+	++totalRequests;
+	console.log(`getAllTickerPrices(), Request Count = ${totalRequests}, Refresh Every Requests = ${refreshStocksEveryRequests}`);
+	if (totalRequests % refreshStocksEveryRequests === 0) {
+		console.log(`getAllTickerPrices(), REFRESHED ALL STOCK PRICES...`);
+		stocks = addOrUpdateStockPrices(stocks);
+	}		
+    return respondAfterDelayOf(delayInMillis, stocks);
 };
 
 const getTickerPriceFor = async function(ticker) {
-	console.log(`getTickerPriceFor(${ticker})`);
-	const stocks = await getAllTickerPrices();
+  console.log(`getTickerPriceFor(${ticker})`);
+  const stocks = await getAllTickerPrices();
   const found = stocks.filter(stock => stock.ticker === ticker)[0];
 	if (found)
 	  return found;
 	else
-		throw new Error(`Ticker ${ticker} Not found!`);
+	  throw new Error(`Ticker ${ticker} Not found!`);
 };
 
 const initializeTickerStreamFor = function(ticker, shared = true) {
 	console.log(`initializeTickerStreamFor(${ticker})`);
 	try {
-    const stock = STOCKS.filter(stock => stock.ticker === ticker)[0];
-  	if (!stock)
-  		throw new Error(`Ticker ${ticker} Not found!`);
+		const stock = STOCKS.filter(stock => stock.ticker === ticker)[0];
+		if (!stock)
+  			throw new Error(`Ticker ${ticker} Not found!`);
     
 		const tickerStream = new rx.Observable(observer => {
 		  let timeout = null;
@@ -112,11 +133,11 @@ const initializeTickerStreamFor = function(ticker, shared = true) {
 		  (function nextValue() {
 		    timeout = setTimeout(
 		      () => {
-						stock.price = randomNumberBetween(stock.low, stock.high, 2);
+				stock.price = randomNumberBetween(stock.low, stock.high, 2);
 		        observer.next(stock);
 		        nextValue();
 		      },
-					// tick every millis
+			  // tick every millis
 		      randomNumberBetween(stock.tickMillis.low, stock.tickMillis.high) 
 		    );
 		  })();
@@ -139,11 +160,20 @@ const initializeTickerStreams = function (shared) {
 	return streams;
 };
 
+console.log(`Adding Stock Prices...`);
+var stocks = addOrUpdateStockPrices(STOCKS);
+console.log(stocks);
+console.log(`Adding Stock Prices...DONE`);
+
 console.log(`Creating Ticker streams...`);
 const TICKERSTREAMS = initializeTickerStreams();
 console.log(TICKERSTREAMS);
+console.log(`Creating Ticker streams...DONE`);
+console.log(`Request Count = ${totalRequests}, Refresh Every Requests = ${refreshStocksEveryRequests}`);
 
 module.exports = {
+	resetTotalRequests: resetTotalRequests,
+	updateRefreshRequestCount: updateRefreshRequestCount,
 	getTickerPriceFor: getTickerPriceFor,
 	getAllTickerPrices: getAllTickerPrices,
 	streamTickerPriceFor: function(ticker) {
