@@ -22,7 +22,8 @@
     <div class="col-md-6">
       <h3><span class="glyphicon glyphicon-refresh"></span> Reset Total Request Count</h3>
       <ul>
-          <li>Using command line <br>
+          <li>Current Request Count is <b><%= configData.total_requests %></b>
+          <li>To reset it, use on command line <br>
 			  <code>curl  https://national-stock-service.herokuapp.com/config/resetRequestCounter</code> OR
 			  <a href="https://national-stock-service.herokuapp.com/config/resetRequestCounter">Click Here</a>
 		  </li>
@@ -31,7 +32,8 @@
     <div class="col-md-6">
       <h3><span class="glyphicon glyphicon-wrench"></span> Change Refresh Every Request Parameter</h3>
       <ul>
-          <li>Using command line <br>
+          <li>Current Refresh Every Request Parameter is <b><%= configData.refresh_stocks_every_requests %></b>
+          <li>To change it, use on command line <br>
 			  <code>curl -X POST -H 'Content-Type: application/json' -d '{ "refresh_stocks_every_requests" : 10 }' https://national-stock-service.herokuapp.com/config/updateRefreshEveryRequest</code>
 		  </li>
       </ul>

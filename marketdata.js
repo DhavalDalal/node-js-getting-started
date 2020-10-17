@@ -92,6 +92,14 @@ const resetTotalRequests = async function () {
 	return {"total_requests": totalRequests};
 }
 
+const getConfigurationData = async function() {
+	console.log(`getConfigurationData()`);
+  return {
+    "total_requests" : totalRequests,
+    "refresh_stocks_every_requests": refreshStocksEveryRequests
+  };
+}
+
 const addOrUpdateStockPrices = function (allStocks) {
 	return allStocks.map(stock => {
 		stock.price = randomNumberBetween(stock.low, stock.high, 2);
@@ -174,6 +182,7 @@ console.log(`Request Count = ${totalRequests}, Refresh Every Requests = ${refres
 module.exports = {
 	resetTotalRequests: resetTotalRequests,
 	updateRefreshRequestCount: updateRefreshRequestCount,
+  getConfigurationData: getConfigurationData,
 	getTickerPriceFor: getTickerPriceFor,
 	getAllTickerPrices: getAllTickerPrices,
 	streamTickerPriceFor: function(ticker) {

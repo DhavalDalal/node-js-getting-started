@@ -89,14 +89,15 @@ let app = express()
 		// throw new Error('Oops! Something went wrong');
 		sendErrorJson(res, 503, error.message);
 	})
-	.get('/config', (req, res) => {
-		console.info("Got Congifuration req...");
+	.get('/config', async (req, res) => {
+		console.info("Got Configuration req...");
+    const configData = await marketdata.getConfigurationData();
 		res.render('pages/config', {
-			req: fullUrl(req),
-			realtimeReq: fullUrl(req, 'ws:')
+  			req: fullUrl(req),
+  			realtimeReq: fullUrl(req, 'ws:'),
+        configData: configData
 		});
 	})
-	
 	.get('/config/resetRequestCounter', (req, res) => {
 		console.info("Got req for all ticker prices...");
         marketdata.resetTotalRequests()
